@@ -1,0 +1,29 @@
+services:
+  mongo:
+    image: ${MONGO_IMAGE}
+    container_name: ${MONGO_NODE1_NAME}
+    restart: unless-stopped
+    network_mode: host
+    entrypoint:
+      - bash
+      - -lc
+      - |
+        install -o mongodb -g mongodb -m 400 /opt/mongo/mongo.key /tmp/mongo-keyfile
+        exec docker-entrypoint.sh mongod --replSet ${MONGO_REPLICA_SET_NAME} --keyFile /tmp/mongo-keyfile --bind_ip_all --port ${MONGO_NODE1_PORT}
+    extra_hosts:
+      - ${MONGO_NODE1_HOST}:${MONGO_NODE1_ADDRESS}
+      - ${MONGO_NODE2_HOST}:${MONGO_NODE2_ADDRESS}
+      - ${MONGO_NODE3_HOST}:${MONGO_NODE3_ADDRESS}
+    environment:
+      MONGO_NODE_PORT: ${MONGO_NODE1_PORT}
+    volumes:
+      - ./data:/data/db
+      - ./mongo.key:/opt/mongo/mongo.key:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'mongosh --quiet --port "$${MONGO_NODE_PORT}" --eval "db.adminCommand({ ping: 1 }).ok" | grep -q 1'
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s

@@ -1,0 +1,8 @@
+.env
+mongo-cluster/node1/data/
+mongo-cluster/node2/data/
+mongo-cluster/node3/data/
+mongo-cluster/node1/mongo.key
+mongo-cluster/node2/mongo.key
+mongo-cluster/node3/mongo.key
+mongo-cluster/mongo.key
